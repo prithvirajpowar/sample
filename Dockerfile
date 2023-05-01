@@ -5,7 +5,7 @@ FROM nginx:latest
 WORKDIR /usr/share/nginx/html
 
 # Copy the web application files
-COPY .lib/main.dart /usr/share/nginx/html
+COPY .web /usr/share/nginx/html
 
 # Copy the nginx configuration file
 COPY default.conf /etc/nginx/conf.d/default.conf
