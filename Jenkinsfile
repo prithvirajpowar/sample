@@ -2,15 +2,6 @@ pipeline {
     agent any
     
     stages {
-        
-        
-        stage('Build APK') {
-            steps {
-                sh 'flutter pub get'
-                sh 'flutter build apk'
-            }
-        }
-        
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t prithvirajpowar/dharati .'
