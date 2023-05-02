@@ -17,11 +17,11 @@ RUN git clone https://github.com/flutter/flutter.git ${FLUTTER_HOME} && \
 ENV PATH="${PATH}:${FLUTTER_HOME}/bin:${FLUTTER_HOME}/bin/cache/dart-sdk/bin"
 
 # Install dependencies
-RUN flutter pub get
-
-# Copy source code
 COPY . .
 
+# Copy source code
+
+RUN flutter pub get
 # Build release version
 RUN flutter build apk --release
 
