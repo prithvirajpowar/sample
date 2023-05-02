@@ -2,18 +2,27 @@ pipeline {
     agent any
     
     stages {
-        stage('Build Docker Image') {
+     
+        stage('Build and test') {
             steps {
-                sh 'docker build -t prithvirajpowar/dharati .'
+               
+                sh 'flutter pub get'
+                sh 'flutter build apk'
             }
         }
         
-        stage('Push Docker Image') {
+        stage('Build Docker image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    sh 'docker push prithvirajpowar/dharati'
+                sh 'docker build -t my-flutter-app .'
+            }
+        }
+        
+        stage('Push to Docker registry') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh "echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin"
                 }
+                sh 'docker push my-flutter-app'
             }
         }
     }
