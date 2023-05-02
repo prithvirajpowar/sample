@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN chown -R cirrus:cirrus .
+RUN chown -R root:root .
 USER cirrus
 RUN flutter pub get
 
