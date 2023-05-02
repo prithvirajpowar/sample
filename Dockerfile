@@ -1,15 +1,30 @@
-# Use an official Nginx runtime as a parent image
-FROM nginx:latest
+# Set base image
+FROM ubuntu:latest
 
-# Set the working directory
-WORKDIR /usr/share/nginx/html
+# Update packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y curl git unzip xz-utils zip libglu1-mesa openjdk-8-jdk wget
 
-# Copy the web application files
-COPY .web /usr/share/nginx/html
+# Set Flutter SDK path
+ENV FLUTTER_HOME="/flutter"
 
-# Copy the nginx configuration file
-COPY default.conf /etc/nginx/conf.d/default.conf
+# Install Flutter SDK
+RUN git clone https://github.com/flutter/flutter.git ${FLUTTER_HOME} && \
+    ${FLUTTER_HOME}/bin/flutter --version
 
-# Expose port 80
-EXPOSE 80
+# Set Flutter and Dart binaries in path
+ENV PATH="${PATH}:${FLUTTER_HOME}/bin:${FLUTTER_HOME}/bin/cache/dart-sdk/bin"
+
+# Install dependencies
+RUN flutter pub get
+
+# Copy source code
+COPY . .
+
+# Build release version
+RUN flutter build apk --release
+
+# Set entry point
+ENTRYPOINT ["flutter", "run"]
 
