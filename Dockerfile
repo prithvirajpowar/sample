@@ -1,30 +1,39 @@
-# Set base image
+# Base image
 FROM ubuntu:latest
 
-# Update packages
+# Install required packages
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y curl git unzip xz-utils zip libglu1-mesa openjdk-8-jdk wget
+    apt-get -y install curl git unzip xz-utils zip libglu1-mesa openjdk-11-jdk
 
-# Set Flutter SDK path
-ENV FLUTTER_HOME="/flutter"
+# Create a new user
+RUN adduser --disabled-password --gecos '' myuser
+
+# Set the working directory
+WORKDIR /app
+
+# Set the owner of the app directory to the new user
+RUN chown -R myuser:myuser /app
+
+# Switch to the new user
+USER myuser
 
 # Install Flutter SDK
-RUN git clone https://github.com/flutter/flutter.git ${FLUTTER_HOME} && \
-    ${FLUTTER_HOME}/bin/flutter --version
+RUN git clone https://github.com/flutter/flutter.git -b stable --depth 1 && \
+    export PATH="$PATH:/app/flutter/bin" && \
+    flutter precache && \
+    flutter doctor
 
-# Set Flutter and Dart binaries in path
-ENV PATH="${PATH}:${FLUTTER_HOME}/bin:${FLUTTER_HOME}/bin/cache/dart-sdk/bin"
-
-# Install dependencies
-COPY . .
+# Set environment variables
+ENV PATH="${PATH}:/app/flutter/bin"
 
 # Copy source code
+COPY . /app
 
+# Install dependencies
 RUN flutter pub get
-# Build release version
-RUN flutter build apk --release
 
-# Set entry point
-ENTRYPOINT ["flutter", "run"]
+# Build the app
+RUN flutter build apk
 
+# Run the app
+CMD ["flutter", "run"]
