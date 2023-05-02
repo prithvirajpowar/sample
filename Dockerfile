@@ -1,5 +1,6 @@
-# Base image with Flutter SDK
+# Base image with Flutter SDK and Android SDK
 FROM cirrusci/flutter:stable AS build
+RUN sdkmanager "emulator" "build-tools;30.0.3" "tools"
 
 # Set working directory
 WORKDIR /app
