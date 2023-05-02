@@ -1,27 +1,34 @@
-# Base image with Flutter SDK and Android SDK
-FROM cirrusci/flutter:stable AS build
-RUN sdkmanager "emulator" "build-tools;30.0.3" "tools"
+FROM openjdk:11-jre-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy the entire project
-COPY . .
+COPY build/app/outputs/apk/release/app-release.apk .
 
-# Install dependencies
-RUN flutter pub get
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -s "https://get.sdkman.io" | bash && \
+    /bin/bash -c "source /root/.sdkman/bin/sdkman-init.sh && sdk install kotlin && sdk install gradle" && \
+    apt-get remove -y curl && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Build the app
-RUN flutter build apk
+RUN /bin/bash -c "source /root/.sdkman/bin/sdkman-init.sh && \
+    mkdir -p src/main/java && \
+    echo \"object Main {\" > src/main/java/Main.kt && \
+    echo \"    @JvmStatic\" >> src/main/java/Main.kt && \
+    echo \"    fun main(args: Array<String>) {\" >> src/main/java/Main.kt && \
+    echo \"        println(\\\"Hello World!\\\");\" >> src/main/java/Main.kt && \
+    echo \"    }\" >> src/main/java/Main.kt && \
+    echo \"}\" >> src/main/java/Main.kt && \
+    echo \"import org.junit.Test\" > src/test/java/ExampleUnitTest.kt && \
+    echo \"import org.junit.Assert.*\" >> src/test/java/ExampleUnitTest.kt && \
+    echo \"class ExampleUnitTest {\" >> src/test/java/ExampleUnitTest.kt && \
+    echo \"    @Test\" >> src/test/java/ExampleUnitTest.kt && \
+    echo \"    fun addition_isCorrect() {\" >> src/test/java/ExampleUnitTest.kt && \
+    echo \"        assertEquals(4, 2 + 2)\" >> src/test/java/ExampleUnitTest.kt && \
+    echo \"    }\" >> src/test/java/ExampleUnitTest.kt && \
+    echo \"}\" >> src/test/java/ExampleUnitTest.kt && \
+    ./gradlew build"
 
-# Production image
-FROM cirrusci/flutter:stable
-
-# Set working directory
-WORKDIR /app
-
-# Copy built artifact from previous stage
-COPY --from=build /app/build/app/outputs/flutter-apk/app-release.apk .
-
-# Start the app
-CMD ["flutter", "run", "--release"]
+CMD ["java", "-jar", "build/libs/app.jar"]
