@@ -1,4 +1,4 @@
-pipeline {
+peline {
     agent any
     stages {
         stage('Build') {
@@ -9,7 +9,7 @@ pipeline {
                 // archive the APK
                 archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
             }
-        }
+        
 
         stage('Dockerize') {
             steps {
@@ -26,4 +26,3 @@ pipeline {
         }
     }
 }
-
