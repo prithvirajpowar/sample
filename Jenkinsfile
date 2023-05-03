@@ -1,24 +1,29 @@
-peline {
+pipeline {
     agent any
+    
     stages {
         stage('Build') {
             steps {
-                    sh 'flutter build apk --release'
-                }
-
-                // archive the APK
+                sh 'flutter pub get'
+                sh 'flutter build apk'
+            }
+        }
+        
+        stage('Archive APK') {
+            steps {
                 archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
             }
+        }
         
-
-        stage('Dockerize') {
+        stage('Build Docker Image') {
             steps {
-                // create the Docker image
                 withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://hub.docker.com/']) {
                     sh 'docker build -t prithvirajpowar/myapp .'
-                }
-
-                // push the Docker image to Docker Hub
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps {
                 withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://hub.docker.com/']) {
                     sh 'docker push prithvirajpowar/myapp'
                 }
