@@ -1,32 +1,25 @@
 pipeline {
     agent any
-    
     stages {
         stage('Build') {
             steps {
-                sh 'flutter pub get'
-                sh 'flutter build apk'
-            }
-        }
-        
-        stage('Archive APK') {
-            steps {
+                    sh 'flutter build apk --release'
+                // archive the APK
                 archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
             }
         }
-        
-        stage('Build Docker Image') {
+
+        stage('Dockerize') {
             steps {
-                sh 'docker build -t prithvirajpowar/myapp:latest .'
-            }
-        }
-        
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD'), url: 'https://hub.docker.com/']) {
-                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                // create the Docker image
+                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://hub.docker.com/']) {
+                    sh 'docker build -t prithvirajpowar/myapp:latest .'
                 }
-                sh 'docker push prithvirajpowar/myapp:2.0.0'
+
+                // push the Docker image to Docker Hub
+                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://hub.docker.com/']) {
+                    sh 'docker push prithvirajpowar/myapp:latest'
+                }
             }
         }
     }
