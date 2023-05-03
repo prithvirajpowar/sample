@@ -5,11 +5,11 @@ pipeline {
         stage('Build') {
             steps {
                 
-                    sh 'flutter build apk --release'
+                    sh 'flutter build apk --debug'
                 
 
                 // archive the APK
-                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
+                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-debug.apk', fingerprint: true
             }
         }
 
