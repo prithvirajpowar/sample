@@ -1,14 +1,16 @@
-# Base image
-FROM openjdk:8-jdk-alpine
+FROM openjdk:11-jdk-slim
 
-# Set working directory
-WORKDIR /app
-
-# Copy APK from Jenkins workspace to container
+# Copy the APK into the image
 COPY build/app/outputs/flutter-apk/app-release.apk app-release.apk
 
-# Expose port
-EXPOSE 8080
+# Install ADB
+RUN apt-get update && apt-get install -y adb
+
+# Expose ADB port
+EXPOSE 5037
+
+# Start ADB server
+CMD ["adb", "start-server"]
 
 # Start the app
-CMD ["java", "-jar", "app-release.apk"]
+ENTRYPOINT ["adb", "install", "-r", "app-release.apk"]
