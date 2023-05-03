@@ -4,27 +4,16 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                
-                    sh 'flutter build apk --debug'
-                
-
-                // archive the APK
-                //archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-debug.apk', fingerprint: true
+                sh 'flutter clean'
+                sh 'flutter pub get'
+                sh 'flutter build apk'
             }
         }
-
-        //stage('Dockerize') {
-            //steps {
-                // create the Docker image
-                //withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://hub.docker.com']) {
-                    //sh 'docker build -t prithvirajpowar/myapp:latest'
-                //}
-
-                // push the Docker image to Docker Hub
-                //withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://hub.docker.com']) {
-                  //  sh 'docker push prithvirajpowar/myapp:latest'
-                //}
-            //}
-        //}
+        
+        stage('Archive APK') {
+            steps {
+                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
+            }
+        }
     }
 }
