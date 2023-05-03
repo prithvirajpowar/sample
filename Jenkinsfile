@@ -12,7 +12,7 @@ pipeline {
         
         stage('Archive APK') {
             steps {
-                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
+                archiveArtifacts artifacts: 'Built build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk', fingerprint: true
             }
         }
     }
