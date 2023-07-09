@@ -6,7 +6,7 @@ pipeline {
             steps {
                 sh 'flutter clean'
                 sh 'flutter pub get'
-                sh 'flutter build apk --split-per-abi'
+                sh 'flutter build apk'
             }
         }
         
